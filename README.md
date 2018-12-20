@@ -24,4 +24,33 @@ Netty 项目旨在为可维护的高性能、高可扩展性协议服务器和�
 世界上最简单的协议不是“Hello,World!”，但是DISCARD。它是一种在没有任何响应的情况下丢弃任何收到的数据的协议。
 
 要实现该DISCARD协议，您唯一需要做的就是忽略所有收到的数据。让我们直接从处理程序实现开始，它处理由Netty生成的I/O事件。
-
+```java
+public class DiscardServerHandler extends io.netty.channel.ChannelInboundHandlerAdapter{
+    
+    @Override
+    public void channelRead(io.netty.channel.ChannelHandlerContext ctx,Object msg){
+        ((ByteBuf)msg).release();
+    }
+    
+    @Override
+    public void exceptionCaught(io.netty.channel.ChannelHandlerContext ctx,Throwable cause){
+        cause.printStackTrace();
+        ctx.close();
+    }
+    
+}
+```
+1.DiscardServerHandler extends ChannelInboundHandlerAdaper，这是一个实现了ChannelInboundHandler。ChannelInboundHandler 提供可以覆盖的各种事件处理方法。目前，只需要扩展ChannelInboundHandlerAdaper而不是实现处理程序接口。
+2.我们在channelRead()方法中覆盖了事件处理方法。每当从客户端接收到新数据时，都会使用收到的消息调用此方法。在此示例中，接收消息的类型是ByteBuf。
+3.要实现DISCARD协议，处理程序必须忽略收到的消息。ByteBuf是一个引用计数对象，必须通过该release（）方法显式释放。请记住，处理程序有责任释放传递给处理程序的任何引用计数对象。通常，channelRead() handler实现如下：
+```java
+@Override
+public void channelRead(ChannelHandlerContext ctx,Object msg){
+    try{
+        //用msg做一些事
+    }
+    final {
+        ReferenceCountUtil.release(msg);
+    }
+}
+```

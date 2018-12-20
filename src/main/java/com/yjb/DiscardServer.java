@@ -37,4 +37,11 @@ public class DiscardServer {
             bosseGroup.shutdownGracefully();
         }
     }
+
+    public static void main(String[] args) throws Exception{
+        int port = 8080;
+
+        DiscardServer discardServer = new DiscardServer(port);
+        discardServer.run();
+    }
 }
